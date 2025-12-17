@@ -29,35 +29,3 @@ void ListBarang() {
         }
      }   
     }
-int main() {
-    int pilihan;
-    do {
-        printf("Menu Inventaris Fasilitas Desa:\n");
-        printf("1. Tambahkan Fasilitas\n");
-        printf("2. Daftar Fasilitas\n");
-        printf("3. Keluar\n");
-        printf("Pilih opsi (1-3): ");
-        if (scanf("%d", &pilihan) != 1) {
-            int c;
-            while ((c = getchar()) != '\n' && c != EOF) { }
-            printf("Input tidak valid. Silakan coba lagi.\n\n");
-            pilihan = 0;
-            continue;
-        }
-        switch (pilihan) {
-            case 1:
-                TambahBarang();
-                break;
-            case 2:
-                ListBarang();
-                break;
-            case 3:
-                printf("Keluar dari program.\n");
-                break;
-            default:
-                printf("Opsi tidak valid. Silakan coba lagi.\n\n");
-        }
-    } while (pilihan != 3);
-
-
-}
