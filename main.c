@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Definisi konstanta
 #define MAX_SARANA 100
 #define MAX_PINJAMAN 100
 #define MAX_FASILITAS 100
 #define FILE_SARANA "sarana.dat"
 #define FILE_PINJAMAN "pinjaman.dat"
 
-// Struct definitions
 typedef struct {
     int idSarana;
     char namaSarana[50];
@@ -22,8 +20,8 @@ typedef struct {
     int idSarana;
     char namaPeminjam[50];
     int kuantitas;
-    char tglKembali[11]; // Format DD/MM/YYYY
-    int status;          // 0: Dipinjam, 1: Selesai
+    char tglKembali[11]; 
+    int status;          
 } Peminjaman;
 
 struct fasilitasDesa {
@@ -35,8 +33,8 @@ struct Sarpras {
     int id;
     char nama[50];
     int jumlah;
-    char status[20];   // "Tersedia" atau "Dipinjam"
-    char tenggat[20];  // Tanggal kembali
+    char status[20];   
+    char tenggat[20];  
 };
 
 struct Barang {
@@ -54,10 +52,9 @@ struct Fasilitas {
 typedef struct {
     char nama[50];
     int jumlah;
-    char tenggat[11]; // format: YYYY-MM-DD
+    char tenggat[11]; 
 } SarprasSorting;
 
-// Global variables
 Sarana inventaris[MAX_SARANA];
 Peminjaman daftarPinjam[MAX_PINJAMAN];
 int jumlahSarana = 0;
@@ -66,7 +63,6 @@ int jumlahPeminjaman = 0;
 struct fasilitasDesa inventarisFasilitas[MAX_FASILITAS];
 int totalBarang = 0;
 
-// Function declarations
 int cariSaranaIndexByID(int id);
 long long dateToLong(const char *dateStr);
 void loadData();
@@ -87,7 +83,6 @@ int compareJumlahDesc(const void *a, const void *b);
 int compareTenggat(const void *a, const void *b);
 void tampilkanData(SarprasSorting s[], int n);
 
-// Function implementations
 int cariSaranaIndexByID(int id) {
     int i;
     for (i = 0; i < jumlahSarana; i++) {
@@ -238,7 +233,6 @@ void tampilkanMenu() {
     printf("Pilih menu (1-7): ");
 }
 
-// Stub implementations untuk fungsi yang dipanggil di menu
 void tambahSarana() {
     if (jumlahSarana >= MAX_SARANA) {
         printf("[ERROR] Kapasitas maksimum sarana tercapai.\n");
@@ -324,7 +318,6 @@ void urutkanJadwalPengembalian() {
         return;
     }
     
-    // Simple bubble sort berdasarkan tanggal
     for (int i = 0; i < jumlahPeminjaman - 1; i++) {
         for (int j = 0; j < jumlahPeminjaman - i - 1; j++) {
             if (dateToLong(daftarPinjam[j].tglKembali) > dateToLong(daftarPinjam[j+1].tglKembali)) {
@@ -371,7 +364,6 @@ void prosesPengembalian() {
     }
 }
 
-// Sorting functions
 int compareJumlahAsc(const void *a, const void *b) {
     SarprasSorting *s1 = (SarprasSorting *)a;
     SarprasSorting *s2 = (SarprasSorting *)b;
@@ -398,7 +390,6 @@ void tampilkanData(SarprasSorting s[], int n) {
     printf("\n");
 }
 
-// Main function
 int main() {
     loadData();
     int pilihan;
