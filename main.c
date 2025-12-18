@@ -74,11 +74,6 @@ void saveData() {
  }
 }
 
-
-#include <stdio.h>
-#include <string.h>
-#define MAX_FASILITAS 100
-
 struct fasilitasDesa{
     char barang[50];
     int jumlahBarang;
