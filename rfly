@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char nama[50];
+    int jumlah;
+    char tenggat[11]; // format: YYYY-MM-DD
+} Sarpras;
+int compareJumlahAsc(const void *a, const void *b) {
+    Sarpras *s1 = (Sarpras *)a;
+    Sarpras *s2 = (Sarpras *)b;
+    return s1->jumlah - s2->jumlah;
+}
+int compareJumlahDesc(const void *a, const void *b) {
+    Sarpras *s1 = (Sarpras *)a;
+    Sarpras *s2 = (Sarpras *)b;
+    return s2->jumlah - s1->jumlah;
+}
+int compareTenggat(const void *a, const void *b) {
+    Sarpras *s1 = (Sarpras *)a;
+    Sarpras *s2 = (Sarpras *)b;
+    return strcmp(s1->tenggat, s2->tenggat);
+}
+void tampilkanData(Sarpras s[], int n) {
+    for (int i = 0; i < n; i++) {
+        printf("Nama: %-15s | Jumlah: %3d | Tenggat: %s\n",
+               s[i].nama, s[i].jumlah, s[i].tenggat);
+    }
+    printf("\n");
+}
+int main() {
+    Sarpras data[] = {
+        {"Proyektor", 5, "2025-12-20"},
+        {"Kursi Lipat", 50, "2025-12-15"},
+        {"Laptop", 3, "2025-12-10"},
+        {"Sound System", 2, "2025-12-18"}
+    };
+
+    int n = sizeof(data) / sizeof(data[0]);
+
+    printf("Sort berdasarkan JUMLAH (Ascending):\n");
+    qsort(data, n, sizeof(Sarpras), compareJumlahAsc);
+    tampilkanData(data, n);
+
+    printf("Sort berdasarkan JUMLAH (Descending):\n");
+    qsort(data, n, sizeof(Sarpras), compareJumlahDesc);
+    tampilkanData(data, n);
+
+    printf("Sort berdasarkan TENGGAT (Terdekat):\n");
+    qsort(data, n, sizeof(Sarpras), compareTenggat);
+    tampilkanData(data, n);
+
+    return 0;
+}
