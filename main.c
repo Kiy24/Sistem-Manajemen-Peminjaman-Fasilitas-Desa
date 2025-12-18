@@ -1,3 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Definisi konstanta
+#define MAX_SARANA 100
+#define MAX_PINJAMAN 100
+#define MAX_FASILITAS 100
+#define FILE_SARANA "sarana.dat"
+#define FILE_PINJAMAN "pinjaman.dat"
+
+// Struct definitions
 typedef struct {
     int idSarana;
     char namaSarana[50];
@@ -14,11 +26,68 @@ typedef struct {
     int status;          // 0: Dipinjam, 1: Selesai
 } Peminjaman;
 
+struct fasilitasDesa {
+    char barang[50];
+    int jumlahBarang;
+};
+
+struct Sarpras {
+    int id;
+    char nama[50];
+    int jumlah;
+    char status[20];   // "Tersedia" atau "Dipinjam"
+    char tenggat[20];  // Tanggal kembali
+};
+
+struct Barang {
+    char nama[50];
+    int jumlah;
+    char kondisi[20];
+};
+
+struct Fasilitas {
+    char nama[50];
+    char lokasi[50];
+    int kapasitas;
+};
+
+typedef struct {
+    char nama[50];
+    int jumlah;
+    char tenggat[11]; // format: YYYY-MM-DD
+} SarprasSorting;
+
+// Global variables
 Sarana inventaris[MAX_SARANA];
 Peminjaman daftarPinjam[MAX_PINJAMAN];
 int jumlahSarana = 0;
 int jumlahPeminjaman = 0;
 
+struct fasilitasDesa inventarisFasilitas[MAX_FASILITAS];
+int totalBarang = 0;
+
+// Function declarations
+int cariSaranaIndexByID(int id);
+long long dateToLong(const char *dateStr);
+void loadData();
+void saveData();
+void tambahBarang();
+void listBarang();
+void cariBarang();
+void fungsiPengembalianTogar(struct Sarpras daftar[], int totalData);
+void tampilkanMenu();
+void tambahSarana();
+void tampilkanInventaris();
+void catatPeminjaman();
+void cariFasilitas();
+void urutkanJadwalPengembalian();
+void prosesPengembalian();
+int compareJumlahAsc(const void *a, const void *b);
+int compareJumlahDesc(const void *a, const void *b);
+int compareTenggat(const void *a, const void *b);
+void tampilkanData(SarprasSorting s[], int n);
+
+// Function implementations
 int cariSaranaIndexByID(int id) {
     int i;
     for (i = 0; i < jumlahSarana; i++) {
@@ -71,35 +140,27 @@ void saveData() {
         fwrite(&jumlahPeminjaman, sizeof(int), 1, fp);
         fwrite(daftarPinjam, sizeof(Peminjaman), jumlahPeminjaman, fp);
         fclose(fp);
- }
+    }
 }
-
-struct fasilitasDesa{
-    char barang[50];
-    int jumlahBarang;
-};
-int totalBarang = 0;
-
-struct fasilitasDesa inventaris[MAX_FASILITAS];
-
 
 void tambahBarang() {
     printf("Nama Barang : ");
-    scanf("%s", inventaris[totalBarang].barang);
+    scanf("%s", inventarisFasilitas[totalBarang].barang);
     printf("Jumlah Barang : ");
-    scanf("%d",&inventaris[totalBarang].jumlahBarang);
-    printf("%s Berhasil ditambahkan\n", inventaris[totalBarang].barang);
-totalBarang++;
+    scanf("%d", &inventarisFasilitas[totalBarang].jumlahBarang);
+    printf("%s Berhasil ditambahkan\n", inventarisFasilitas[totalBarang].barang);
+    totalBarang++;
 }
+
 void listBarang() {
-    if (totalBarang == 0){
-        printf("Penyimpanan Masih Kosong!\n");}
-        else {
-            for (int i  = 0; i < totalBarang; i++) {
-        printf("%d, %s, %d\n", i+1, inventaris[i].barang, inventaris[i].jumlahBarang);
+    if (totalBarang == 0) {
+        printf("Penyimpanan Masih Kosong!\n");
+    } else {
+        for (int i = 0; i < totalBarang; i++) {
+            printf("%d, %s, %d\n", i+1, inventarisFasilitas[i].barang, inventarisFasilitas[i].jumlahBarang);
         }
-     }
     }
+}
 
 void cariBarang() {
     char cari[50];
@@ -109,9 +170,9 @@ void cariBarang() {
     scanf("%s", cari);
 
     for (int i = 0; i < totalBarang; i++) {
-        if (strcmp(inventaris[i].barang, cari) == 0) {
+        if (strcmp(inventarisFasilitas[i].barang, cari) == 0) {
             printf("Barang ditemukan!\n");
-            printf("%d, %s, %d\n", i+1, inventaris[i].barang, inventaris[i].jumlahBarang);
+            printf("%d, %s, %d\n", i+1, inventarisFasilitas[i].barang, inventarisFasilitas[i].jumlahBarang);
             ketemu = 1;
             break;
         }
@@ -121,14 +182,6 @@ void cariBarang() {
         printf("Barang %s tidak ditemukan dalam inventaris.\n", cari);
     }
 }
-
-struct Sarpras {
-    int id;
-    char nama[50];
-    int jumlah;
-    char status[20];   // "Tersedia" atau "Dipinjam"
-    char tenggat[20];  // Tanggal kembali
-};
 
 void fungsiPengembalianTogar(struct Sarpras daftar[], int totalData) {
     int idCari;
@@ -153,7 +206,6 @@ void fungsiPengembalianTogar(struct Sarpras daftar[], int totalData) {
                 printf("\n [!] PERINGATAN: Barang '%s' sudah ada di tempat.\n", daftar[i].nama);
                 printf("     Status saat ini: %s\n", daftar[i].status);
             } else {
-                
                 strcpy(daftar[i].status, "Tersedia");
                 strcpy(daftar[i].tenggat, "-");
 
@@ -171,99 +223,182 @@ void fungsiPengembalianTogar(struct Sarpras daftar[], int totalData) {
     printf("==========================================\n");
 }
 
-#include <stdio.h>
-
-// struct barang
-struct Barang {
-    char nama[50];
-    int jumlah;
-    char kondisi[20];
-};
-
-// struct fasilitas
-struct Fasilitas {
-    char nama[50];
-    char lokasi[50];
-    int kapasitas;
-};
-
-int main() {
-    struct Barang barang;
-    struct Fasilitas fasilitas;
-
-    printf("=====================================\n");
-    printf("        INPUT DATA SARPRAS\n");
-    printf("=====================================\n\n");
-
-    // ------------------------------
-    // INPUT DATA BARANG
-    // ------------------------------
-    printf("=== INPUT DATA BARANG ===\n");
-
-    printf("Masukkan Nama Barang      : ");
-    scanf(" %s", barang.nama);   // membaca string dengan spasi
-
-    printf("Masukkan Jumlah Barang    : ");
-    scanf("%d", &barang.jumlah);
-
-    printf("Masukkan Kondisi Barang   : ");
-    scanf(" %s", barang.kondisi);
-
-
-    // ------------------------------
-    // INPUT DATA FASILITAS
-    // ------------------------------
-    printf("\n=== INPUT DATA FASILITAS ===\n");
-
-    printf("Masukkan Nama Fasilitas   : ");
-    scanf(" %s", fasilitas.nama);
-
-    printf("Masukkan Lokasi Fasilitas : ");
-    scanf(" %s", fasilitas.lokasi);
-
-    printf("Masukkan Kapasitas        : ");
-    scanf("%d", &fasilitas.kapasitas);
-
-
-    // ------------------------------
-    // OUTPUT (MENAMPILKAN DATA)
-    // ------------------------------
-    printf("\n=====================================\n");
-    printf("           OUTPUT DATA\n");
-    printf("=====================================\n");
-
-    printf("\n>>> DATA BARANG <<<\n");
-    printf("Nama Barang  : %s\n", barang.nama);
-    printf("Jumlah       : %d unit\n", barang.jumlah);
-    printf("Kondisi      : %s\n", barang.kondisi);
-
-    printf("\n>>> DATA FASILITAS <<<\n");
-    printf("Nama Fasilitas : %s\n", fasilitas.nama);
-    printf("Lokasi         : %s\n", fasilitas.lokasi);
-    printf("Kapasitas      : %d orang\n", fasilitas.kapasitas);
-
-    return 0;
-}
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 void tampilkanMenu() {
     printf("\n====================================\n");
     printf("SIMPASDES (Sarana Desa)\n");
     printf("====================================\n");
-    printf("1. Tambah Jenis Sarana Baru\n"); // Fitur 1a
-    printf("2. Tampilkan Inventaris Sarana\n"); // Fitur 1b
-    printf("3. Catat Peminjaman Baru\n"); // Fitur 2
-    printf("4. Cari Detail Sarana (Searching)\n"); // Fitur 3
-    printf("5. Urutkan Jadwal Pengembalian (Sorting)\n"); // Fitur 4
-    printf("6. Proses Pengembalian Sarana\n"); // Fitur 5
+    printf("1. Tambah Jenis Sarana Baru\n");
+    printf("2. Tampilkan Inventaris Sarana\n");
+    printf("3. Catat Peminjaman Baru\n");
+    printf("4. Cari Detail Sarana (Searching)\n");
+    printf("5. Urutkan Jadwal Pengembalian (Sorting)\n");
+    printf("6. Proses Pengembalian Sarana\n");
     printf("7. Keluar & Simpan Data\n");
     printf("------------------------------------\n");
     printf("Pilih menu (1-7): ");
 }
 
+// Stub implementations untuk fungsi yang dipanggil di menu
+void tambahSarana() {
+    if (jumlahSarana >= MAX_SARANA) {
+        printf("[ERROR] Kapasitas maksimum sarana tercapai.\n");
+        return;
+    }
+    
+    printf("\n=== TAMBAH SARANA BARU ===\n");
+    printf("ID Sarana: ");
+    scanf("%d", &inventaris[jumlahSarana].idSarana);
+    printf("Nama Sarana: ");
+    scanf("%s", inventaris[jumlahSarana].namaSarana);
+    printf("Jumlah Total: ");
+    scanf("%d", &inventaris[jumlahSarana].jumlahTotal);
+    inventaris[jumlahSarana].jumlahTersedia = inventaris[jumlahSarana].jumlahTotal;
+    
+    printf("[INFO] Sarana '%s' berhasil ditambahkan.\n", inventaris[jumlahSarana].namaSarana);
+    jumlahSarana++;
+}
+
+void tampilkanInventaris() {
+    printf("\n=== INVENTARIS SARANA ===\n");
+    if (jumlahSarana == 0) {
+        printf("Belum ada sarana terdaftar.\n");
+        return;
+    }
+    
+    printf("%-5s %-20s %-10s %-10s\n", "ID", "Nama", "Total", "Tersedia");
+    printf("---------------------------------------------------\n");
+    for (int i = 0; i < jumlahSarana; i++) {
+        printf("%-5d %-20s %-10d %-10d\n", 
+               inventaris[i].idSarana,
+               inventaris[i].namaSarana,
+               inventaris[i].jumlahTotal,
+               inventaris[i].jumlahTersedia);
+    }
+}
+
+void catatPeminjaman() {
+    if (jumlahPeminjaman >= MAX_PINJAMAN) {
+        printf("[ERROR] Kapasitas maksimum peminjaman tercapai.\n");
+        return;
+    }
+    
+    printf("\n=== CATAT PEMINJAMAN BARU ===\n");
+    printf("ID Peminjaman: ");
+    scanf("%d", &daftarPinjam[jumlahPeminjaman].idPeminjaman);
+    printf("ID Sarana: ");
+    scanf("%d", &daftarPinjam[jumlahPeminjaman].idSarana);
+    printf("Nama Peminjam: ");
+    scanf("%s", daftarPinjam[jumlahPeminjaman].namaPeminjam);
+    printf("Kuantitas: ");
+    scanf("%d", &daftarPinjam[jumlahPeminjaman].kuantitas);
+    printf("Tanggal Kembali (DD/MM/YYYY): ");
+    scanf("%s", daftarPinjam[jumlahPeminjaman].tglKembali);
+    daftarPinjam[jumlahPeminjaman].status = 0;
+    
+    printf("[INFO] Peminjaman berhasil dicatat.\n");
+    jumlahPeminjaman++;
+}
+
+void cariFasilitas() {
+    int id;
+    printf("\n=== CARI DETAIL SARANA ===\n");
+    printf("Masukkan ID Sarana: ");
+    scanf("%d", &id);
+    
+    int index = cariSaranaIndexByID(id);
+    if (index != -1) {
+        printf("\nSarana ditemukan:\n");
+        printf("ID          : %d\n", inventaris[index].idSarana);
+        printf("Nama        : %s\n", inventaris[index].namaSarana);
+        printf("Jumlah Total: %d\n", inventaris[index].jumlahTotal);
+        printf("Tersedia    : %d\n", inventaris[index].jumlahTersedia);
+    } else {
+        printf("[ERROR] Sarana dengan ID %d tidak ditemukan.\n", id);
+    }
+}
+
+void urutkanJadwalPengembalian() {
+    printf("\n=== JADWAL PENGEMBALIAN (Terurut) ===\n");
+    if (jumlahPeminjaman == 0) {
+        printf("Belum ada data peminjaman.\n");
+        return;
+    }
+    
+    // Simple bubble sort berdasarkan tanggal
+    for (int i = 0; i < jumlahPeminjaman - 1; i++) {
+        for (int j = 0; j < jumlahPeminjaman - i - 1; j++) {
+            if (dateToLong(daftarPinjam[j].tglKembali) > dateToLong(daftarPinjam[j+1].tglKembali)) {
+                Peminjaman temp = daftarPinjam[j];
+                daftarPinjam[j] = daftarPinjam[j+1];
+                daftarPinjam[j+1] = temp;
+            }
+        }
+    }
+    
+    printf("%-5s %-20s %-12s %-10s\n", "ID", "Peminjam", "Tgl Kembali", "Status");
+    printf("-----------------------------------------------------\n");
+    for (int i = 0; i < jumlahPeminjaman; i++) {
+        printf("%-5d %-20s %-12s %-10s\n",
+               daftarPinjam[i].idPeminjaman,
+               daftarPinjam[i].namaPeminjam,
+               daftarPinjam[i].tglKembali,
+               daftarPinjam[i].status == 0 ? "Dipinjam" : "Selesai");
+    }
+}
+
+void prosesPengembalian() {
+    int id;
+    printf("\n=== PROSES PENGEMBALIAN SARANA ===\n");
+    printf("Masukkan ID Peminjaman: ");
+    scanf("%d", &id);
+    
+    int found = 0;
+    for (int i = 0; i < jumlahPeminjaman; i++) {
+        if (daftarPinjam[i].idPeminjaman == id) {
+            found = 1;
+            if (daftarPinjam[i].status == 1) {
+                printf("[INFO] Peminjaman sudah selesai sebelumnya.\n");
+            } else {
+                daftarPinjam[i].status = 1;
+                printf("[INFO] Pengembalian berhasil diproses.\n");
+            }
+            break;
+        }
+    }
+    
+    if (!found) {
+        printf("[ERROR] ID Peminjaman tidak ditemukan.\n");
+    }
+}
+
+// Sorting functions
+int compareJumlahAsc(const void *a, const void *b) {
+    SarprasSorting *s1 = (SarprasSorting *)a;
+    SarprasSorting *s2 = (SarprasSorting *)b;
+    return s1->jumlah - s2->jumlah;
+}
+
+int compareJumlahDesc(const void *a, const void *b) {
+    SarprasSorting *s1 = (SarprasSorting *)a;
+    SarprasSorting *s2 = (SarprasSorting *)b;
+    return s2->jumlah - s1->jumlah;
+}
+
+int compareTenggat(const void *a, const void *b) {
+    SarprasSorting *s1 = (SarprasSorting *)a;
+    SarprasSorting *s2 = (SarprasSorting *)b;
+    return strcmp(s1->tenggat, s2->tenggat);
+}
+
+void tampilkanData(SarprasSorting s[], int n) {
+    for (int i = 0; i < n; i++) {
+        printf("Nama: %-15s | Jumlah: %3d | Tenggat: %s\n",
+               s[i].nama, s[i].jumlah, s[i].tenggat);
+    }
+    printf("\n");
+}
+
+// Main function
 int main() {
     loadData();
     int pilihan;
@@ -292,54 +427,6 @@ int main() {
             default: printf("[ERROR] Pilihan tidak valid.\n");
         }
     } while (pilihan != 7);
-typedef struct {
-    char nama[50];
-    int jumlah;
-    char tenggat[11]; // format: YYYY-MM-DD
-} Sarpras;
-int compareJumlahAsc(const void *a, const void *b) {
-    Sarpras *s1 = (Sarpras *)a;
-    Sarpras *s2 = (Sarpras *)b;
-    return s1->jumlah - s2->jumlah;
-}
-int compareJumlahDesc(const void *a, const void *b) {
-    Sarpras *s1 = (Sarpras *)a;
-    Sarpras *s2 = (Sarpras *)b;
-    return s2->jumlah - s1->jumlah;
-}
-int compareTenggat(const void *a, const void *b) {
-    Sarpras *s1 = (Sarpras *)a;
-    Sarpras *s2 = (Sarpras *)b;
-    return strcmp(s1->tenggat, s2->tenggat);
-}
-void tampilkanData(Sarpras s[], int n) {
-    for (int i = 0; i < n; i++) {
-        printf("Nama: %-15s | Jumlah: %3d | Tenggat: %s\n",
-               s[i].nama, s[i].jumlah, s[i].tenggat);
-    }
-    printf("\n");
-}
-int main() {
-    Sarpras data[] = {
-        {"Proyektor", 5, "2025-12-20"},
-        {"Kursi Lipat", 50, "2025-12-15"},
-        {"Laptop", 3, "2025-12-10"},
-        {"Sound System", 2, "2025-12-18"}
-    };
-
-    int n = sizeof(data) / sizeof(data[0]);
-
-    printf("Sort berdasarkan JUMLAH (Ascending):\n");
-    qsort(data, n, sizeof(Sarpras), compareJumlahAsc);
-    tampilkanData(data, n);
-
-    printf("Sort berdasarkan JUMLAH (Descending):\n");
-    qsort(data, n, sizeof(Sarpras), compareJumlahDesc);
-    tampilkanData(data, n);
-
-    printf("Sort berdasarkan TENGGAT (Terdekat):\n");
-    qsort(data, n, sizeof(Sarpras), compareTenggat);
-    tampilkanData(data, n);
 
     return 0;
 }
