@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 
-// Definisi konstanta
 #define MAX_SARANA 100
 #define MAX_PINJAMAN 100
 #define MAX_FASILITAS 100
