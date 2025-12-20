@@ -84,12 +84,6 @@ int safeInputInt(int *var) {
     while (getchar() != '\n');
     return 1;
 }
-
-/**
- * Fungsi untuk input string yang aman (support spasi)
- * maxLen: maksimal panjang string (termasuk null terminator)
- * Return: 1 jika sukses, 0 jika gagal
- */
 int safeInputString(char *str, int maxLen) {
     int c;
     while ((c = getchar()) == ' ' || c == '\t');
