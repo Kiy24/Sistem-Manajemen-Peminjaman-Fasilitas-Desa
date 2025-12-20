@@ -26,8 +26,8 @@ typedef struct {
     int idSarana;
     char namaPeminjam[50];
     int kuantitas;
-    char tglKembali[11]; // Format DD/MM/YYYY
-    int status;          // 0: Dipinjam, 1: Selesai
+    char tglKembali[11]; 
+    int status;          
 } Peminjaman;
 
 struct fasilitasDesa {
@@ -39,8 +39,8 @@ struct Sarpras {
     int id;
     char nama[50];
     int jumlah;
-    char status[20];   // "Tersedia" atau "Dipinjam"
-    char tenggat[20];  // Tanggal kembali
+    char status[20];   
+    char tenggat[20];  
 };
 
 struct Barang {
@@ -58,7 +58,7 @@ struct Fasilitas {
 typedef struct {
     char nama[50];
     int jumlah;
-    char tenggat[11]; // format: YYYY-MM-DD
+    char tenggat[11]; 
 } SarprasSorting;
 
 // Global variables
@@ -74,10 +74,6 @@ int totalBarang = 0;
 // HELPER FUNCTIONS - INPUT VALIDATION
 // ============================================================================
 
-/**
- * Fungsi untuk input integer yang aman
- * Return: 1 jika sukses, 0 jika gagal
- */
 int safeInputInt(int *var) {
     if (scanf("%d", var) != 1) {
         // Clear input buffer jika scanf gagal
@@ -96,62 +92,40 @@ int safeInputInt(int *var) {
  * Return: 1 jika sukses, 0 jika gagal
  */
 int safeInputString(char *str, int maxLen) {
-    // Clear leading whitespace
     int c;
     while ((c = getchar()) == ' ' || c == '\t');
     if (c == '\n' || c == EOF) {
         str[0] = '\0';
         return 0;
     }
-
-    // Baca karakter pertama
     str[0] = c;
     int i = 1;
-
-    // Baca sisanya sampai newline atau maxLen-1
     while (i < maxLen - 1 && (c = getchar()) != '\n' && c != EOF) {
         str[i++] = c;
     }
-
-    // Clear buffer jika input terlalu panjang
     if (c != '\n' && c != EOF) {
         while (getchar() != '\n');
     }
-
     str[i] = '\0';
     return 1;
 }
-
-/**
- * Fungsi validasi format tanggal DD/MM/YYYY
- * Return: 1 jika valid, 0 jika invalid
- */
 int isValidDate(const char *dateStr) {
-    // Cek panjang string harus 10
     if (strlen(dateStr) != 10) {
         return 0;
     }
-
-    // Cek format DD/MM/YYYY (posisi 2 dan 5 harus '/')
     if (dateStr[2] != '/' || dateStr[5] != '/') {
         return 0;
     }
-
-    // Cek semua karakter selain '/' harus digit
     for (int i = 0; i < 10; i++) {
         if (i == 2 || i == 5) continue;
         if (!isdigit(dateStr[i])) {
             return 0;
         }
     }
-
-    // Parse day, month, year
     int day = (dateStr[0] - '0') * 10 + (dateStr[1] - '0');
     int month = (dateStr[3] - '0') * 10 + (dateStr[4] - '0');
     int year = (dateStr[6] - '0') * 1000 + (dateStr[7] - '0') * 100 +
                (dateStr[8] - '0') * 10 + (dateStr[9] - '0');
-
-    // Validasi range
     if (day < 1 || day > 31) return 0;
     if (month < 1 || month > 12) return 0;
     if (year < 2000 || year > 2100) return 0;
@@ -235,9 +209,6 @@ void tambahSarana() {
         printf("[ERROR] Kapasitas maksimum sarana tercapai.\n");
         return;
     }
-
-    // Mencari ID terbesar yang sudah ada, kemudian menambahkan 1
-    // Jika belum ada data, ID dimulai dari 1
     int idBaru = 1;
     for (int i = 0; i < jumlahSarana; i++) {
         if (inventaris[i].idSarana >= idBaru) {
@@ -246,7 +217,6 @@ void tambahSarana() {
     }
 
     printf("\n=== TAMBAH SARANA BARU ===\n");
-    // ID otomatis dihasilkan oleh sistem
     inventaris[jumlahSarana].idSarana = idBaru;
     printf("ID Sarana (otomatis): %d\n", idBaru);
 
@@ -270,8 +240,6 @@ void tambahSarana() {
             printf("Masukkan lagi: ");
         }
     }
-
-    // Saat pertama kali ditambahkan, semua item tersedia
     inventaris[jumlahSarana].jumlahTersedia = inventaris[jumlahSarana].jumlahTotal;
 
     printf("[INFO] Sarana '%s' berhasil ditambahkan dengan ID %d.\n",
@@ -301,9 +269,6 @@ void catatPeminjaman() {
         printf("[ERROR] Kapasitas maksimum peminjaman tercapai.\n");
         return;
     }
-
-    // Mencari ID peminjaman terbesar yang sudah ada, kemudian menambahkan 1
-    // Jika belum ada data peminjaman, ID dimulai dari 1
     int idPeminjamanBaru = 1;
     for (int i = 0; i < jumlahPeminjaman; i++) {
         if (daftarPinjam[i].idPeminjaman >= idPeminjamanBaru) {
@@ -312,16 +277,12 @@ void catatPeminjaman() {
     }
 
     printf("\n=== CATAT PEMINJAMAN BARU ===\n");
-    // ID peminjaman otomatis dihasilkan oleh sistem
     daftarPinjam[jumlahPeminjaman].idPeminjaman = idPeminjamanBaru;
     printf("ID Peminjaman (otomatis): %d\n", idPeminjamanBaru);
-
-    // Input dan validasi ID Sarana
     int idSarana;
     printf("ID Sarana: ");
     while (1) {
         if (safeInputInt(&idSarana)) {
-            // Validasi apakah sarana dengan ID tersebut ada
             int index = cariSaranaIndexByID(idSarana);
             if (index == -1) {
                 printf("[ERROR] Sarana dengan ID %d tidak ditemukan.\n", idSarana);
@@ -371,10 +332,7 @@ void catatPeminjaman() {
             printf("Masukkan lagi: ");
         }
     }
-
-    // Status awal adalah 0 (Dipinjam)
     daftarPinjam[jumlahPeminjaman].status = 0;
-
     printf("[INFO] Peminjaman berhasil dicatat dengan ID %d.\n", idPeminjamanBaru);
     jumlahPeminjaman++;
 }
@@ -438,8 +396,6 @@ void urutkanJadwalPengembalian() {
         printf("Belum ada data peminjaman.\n");
         return;
     }
-
-    // Simple bubble sort berdasarkan tanggal
     for (int i = 0; i < jumlahPeminjaman - 1; i++) {
         for (int j = 0; j < jumlahPeminjaman - i - 1; j++) {
             if (dateToLong(daftarPinjam[j].tglKembali) > dateToLong(daftarPinjam[j+1].tglKembali)) {
@@ -460,8 +416,6 @@ void urutkanJadwalPengembalian() {
                daftarPinjam[i].status == 0 ? "Dipinjam" : "Selesai");
     }
 }
-
-// Fungsi pembanding untuk qsort (contoh implementasi alternatif)
 int compareJumlahAsc(const void *a, const void *b) {
     SarprasSorting *s1 = (SarprasSorting *)a;
     SarprasSorting *s2 = (SarprasSorting *)b;
