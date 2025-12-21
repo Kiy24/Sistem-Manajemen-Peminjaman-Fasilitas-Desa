@@ -14,11 +14,15 @@ struct fasilitasDesa inventaris[MAX_FASILITAS];
 
 void tambahBarang() {
     printf("Nama Barang : ");
-    scanf("%s", inventaris[totalBarang].barang);
+    safeInputString(inventarisFasilitas[totalBarang].barang, 50);
+
     printf("Jumlah Barang : ");
-    scanf("%d",&inventaris[totalBarang].jumlahBarang);
-    printf("%s Berhasil ditambahkan\n", inventaris[totalBarang].barang);
-totalBarang++;
+    while (!safeInputInt(&inventarisFasilitas[totalBarang].jumlahBarang)) {
+        printf("Masukkan lagi: ");
+    }
+
+    printf("%s Berhasil ditambahkan\n", inventarisFasilitas[totalBarang].barang);
+    totalBarang++;
 }
 void listBarang() {
     if (totalBarang == 0){
