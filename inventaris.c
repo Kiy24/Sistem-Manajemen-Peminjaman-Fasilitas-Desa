@@ -25,15 +25,14 @@ void tambahBarang() {
     totalBarang++;
 }
 void listBarang() {
-    if (totalBarang == 0){
-        printf("Penyimpanan Masih Kosong!\n");}
-        else {
-            for (int i  = 0; i < totalBarang; i++) {
-        printf("%d, %s, %d\n", i+1, inventaris[i].barang, inventaris[i].jumlahBarang);
+    if (totalBarang == 0) {
+        printf("Penyimpanan Masih Kosong!\n");
+    } else {
+        for (int i = 0; i < totalBarang; i++) {
+            printf("%d, %s, %d\n", i+1, inventarisFasilitas[i].barang, inventarisFasilitas[i].jumlahBarang);
         }
-     }
     }
-
+}
 void cariBarang() {
     char cari[50];
     int ketemu = 0;
